@@ -3,7 +3,7 @@ from dash import Dash, html, dcc, Input, Output
 import plotly.express as px
 
 # Path to your CSV
-FILE_PATH = "C:/Users/0wner/Downloads/GIT_Folder/quantium-starter-repo-main/quantium-starter-repo/formatted_data.csv"
+FILE_PATH = "formatted_data.csv"
 
 def load_data():
     """Load and prepare the data"""
@@ -11,7 +11,7 @@ def load_data():
     df['date'] = pd.to_datetime(df['date'])  # ensure date column is datetime
     df = df.sort_values('date')
     # Filter only Pink Morsel if needed
-    pink_morsel_df = df[df['morsel'] == 'Pink Morsel'] if 'morsel' in df.columns else df
+    pink_morsel_df = df
     return pink_morsel_df
 
 def create_sales_chart(dataset, selected_region='all'):
