@@ -5,19 +5,17 @@ import plotly.express as px
 # Path to your CSV
 FILE_PATH = "C:/Users/0wner/Downloads/GIT_Folder/quantium-starter-repo-main/quantium-starter-repo/formatted_data.csv"
 
-# Load and prepare the data
-df = pd.read_csv(FILE_PATH)
-df['date'] = pd.to_datetime(df['date'])  # ensure date column is datetime
-df = df.sort_values('date')
+def load_data():
+    """Load and prepare the data"""
+    df = pd.read_csv(FILE_PATH)
+    df['date'] = pd.to_datetime(df['date'])  # ensure date column is datetime
+    df = df.sort_values('date')
+    # Filter only Pink Morsel if needed
+    pink_morsel_df = df[df['morsel'] == 'Pink Morsel'] if 'morsel' in df.columns else df
+    return pink_morsel_df
 
-# Filter only Pink Morsel if needed
-pink_morsel_df = df[df['morsel'] == 'Pink Morsel'] if 'morsel' in df.columns else df
-
-# Initialize the Dash app
-app = Dash(__name__)
-
-# Function to generate the line chart
 def create_sales_chart(dataset, selected_region='all'):
+    """Function to generate the line chart"""
     if selected_region != 'all':
         dataset = dataset[dataset['region'].str.lower() == selected_region]
     
@@ -97,183 +95,193 @@ def create_sales_chart(dataset, selected_region='all'):
     
     return fig
 
-
-# Layout of the app with enhanced styling
-app.layout = html.Div(
-    style={
-        'backgroundColor': '#FFF5FA',
-        'minHeight': '100vh',
-        'padding': '20px',
-        'fontFamily': 'Arial, sans-serif'
-    },
-    children=[
-        # Header Section
-        html.Div(
-            style={
-                'background': 'linear-gradient(135deg, #FF6B9D 0%, #D6336C 100%)',
-                'padding': '30px',
-                'borderRadius': '15px',
-                'boxShadow': '0 4px 20px rgba(214, 51, 108, 0.3)',
-                'marginBottom': '30px',
-                'color': 'white'
-            },
-            children=[
-                html.H1(
-                    "🍬 Pink Morsel Sales Visualizer",
-                    style={
-                        'textAlign': 'center',
-                        'color': 'white',
-                        'fontSize': '36px',
-                        'fontWeight': 'bold',
-                        'marginBottom': '10px',
-                        'textShadow': '2px 2px 4px rgba(0,0,0,0.2)'
-                    }
-                ),
-                html.P(
-                    "Analyze sales trends across different regions. Compare performance before and after the January 15, 2021 price increase.",
-                    style={
-                        'textAlign': 'center',
-                        'fontSize': '18px',
-                        'color': 'rgba(255, 255, 255, 0.9)',
-                        'maxWidth': '800px',
-                        'margin': '0 auto',
-                        'lineHeight': '1.6'
-                    }
-                )
-            ]
-        ),
-        
-        # Control Panel
-        html.Div(
-            style={
-                'backgroundColor': 'white',
-                'padding': '25px',
-                'borderRadius': '12px',
-                'boxShadow': '0 2px 15px rgba(0, 0, 0, 0.1)',
-                'marginBottom': '30px'
-            },
-            children=[
-                html.H2(
-                    "📊 Region Filter",
-                    style={
-                        'color': '#D6336C',
-                        'marginBottom': '20px',
-                        'fontSize': '22px',
-                        'textAlign': 'center'
-                    }
-                ),
-                html.P(
-                    "Select a region to view specific sales data, or choose 'All' to see the complete picture:",
-                    style={
-                        'textAlign': 'center',
-                        'color': '#666666',
-                        'marginBottom': '20px',
-                        'fontSize': '16px'
-                    }
-                ),
-                
-                # Region filter radio buttons with enhanced styling
-                html.Div(
-                    dcc.RadioItems(
-                        id='region_selector',
-                        options=[
-                            {'label': '🌍 All Regions', 'value': 'all'},
-                            {'label': '📍 North', 'value': 'north'},
-                            {'label': '📍 East', 'value': 'east'},
-                            {'label': '📍 South', 'value': 'south'},
-                            {'label': '📍 West', 'value': 'west'}
-                        ],
-                        value='all',
-                        inline=True,
-                        labelStyle={
-                            'display': 'inline-block',
-                            'margin': '10px 15px',
-                            'padding': '12px 25px',
-                            'backgroundColor': '#FFF5FA',
-                            'borderRadius': '8px',
-                            'border': '2px solid #FFD1DC',
-                            'cursor': 'pointer',
-                            'transition': 'all 0.3s ease',
-                            'fontSize': '16px',
-                            'fontWeight': '500'
+def create_app():
+    """Create and return the Dash app instance"""
+    app = Dash(__name__)
+    
+    # Load data
+    pink_morsel_df = load_data()
+    
+    # Layout of the app with enhanced styling
+    app.layout = html.Div(
+        style={
+            'backgroundColor': '#FFF5FA',
+            'minHeight': '100vh',
+            'padding': '20px',
+            'fontFamily': 'Arial, sans-serif'
+        },
+        children=[
+            # Header Section
+            html.Div(
+                style={
+                    'background': 'linear-gradient(135deg, #FF6B9D 0%, #D6336C 100%)',
+                    'padding': '30px',
+                    'borderRadius': '15px',
+                    'boxShadow': '0 4px 20px rgba(214, 51, 108, 0.3)',
+                    'marginBottom': '30px',
+                    'color': 'white'
+                },
+                children=[
+                    html.H1(
+                        "Pink Morsel Sales Visualizer",
+                        style={
+                            'textAlign': 'center',
+                            'color': 'white',
+                            'fontSize': '36px',
+                            'fontWeight': 'bold',
+                            'marginBottom': '10px',
+                            'textShadow': '2px 2px 4px rgba(0,0,0,0.2)'
                         },
-                        inputStyle={
-                            'marginRight': '8px',
-                            'transform': 'scale(1.2)'
-                        },
-                        style={'textAlign': 'center', 'display': 'flex', 'justifyContent': 'center', 'flexWrap': 'wrap'}
+                        id='header'
                     ),
-                    style={'marginBottom': '10px'}
-                ),
-                
-                # Key Insight Box
-                html.Div(
-                    style={
-                        'backgroundColor': '#FFF0F5',
-                        'borderLeft': '4px solid #FF6B9D',
-                        'padding': '15px',
-                        'marginTop': '20px',
-                        'borderRadius': '8px'
-                    },
-                    children=[
-                        html.H4(
-                            "📈 Key Insight:",
-                            style={'color': '#D6336C', 'marginBottom': '8px'}
+                    html.P(
+                        "Analyze sales trends across different regions. Compare performance before and after the January 15, 2021 price increase.",
+                        style={
+                            'textAlign': 'center',
+                            'fontSize': '18px',
+                            'color': 'rgba(255, 255, 255, 0.9)',
+                            'maxWidth': '800px',
+                            'margin': '0 auto',
+                            'lineHeight': '1.6'
+                        }
+                    )
+                ]
+            ),
+            
+            # Control Panel
+            html.Div(
+                style={
+                    'backgroundColor': 'white',
+                    'padding': '25px',
+                    'borderRadius': '12px',
+                    'boxShadow': '0 2px 15px rgba(0, 0, 0, 0.1)',
+                    'marginBottom': '30px'
+                },
+                children=[
+                    html.H2(
+                        "Region Filter",
+                        style={
+                            'color': '#D6336C',
+                            'marginBottom': '20px',
+                            'fontSize': '22px',
+                            'textAlign': 'center'
+                        }
+                    ),
+                    html.P(
+                        "Select a region to view specific sales data, or choose 'All' to see the complete picture:",
+                        style={
+                            'textAlign': 'center',
+                            'color': '#666666',
+                            'marginBottom': '20px',
+                            'fontSize': '16px'
+                        }
+                    ),
+                    
+                    # Region filter radio buttons with enhanced styling
+                    html.Div(
+                        dcc.RadioItems(
+                            id='region_selector',
+                            options=[
+                                {'label': 'All Regions', 'value': 'all'},
+                                {'label': 'North', 'value': 'north'},
+                                {'label': 'East', 'value': 'east'},
+                                {'label': 'South', 'value': 'south'},
+                                {'label': 'West', 'value': 'west'}
+                            ],
+                            value='all',
+                            inline=True,
+                            labelStyle={
+                                'display': 'inline-block',
+                                'margin': '10px 15px',
+                                'padding': '12px 25px',
+                                'backgroundColor': '#FFF5FA',
+                                'borderRadius': '8px',
+                                'border': '2px solid #FFD1DC',
+                                'cursor': 'pointer',
+                                'transition': 'all 0.3s ease',
+                                'fontSize': '16px',
+                                'fontWeight': '500'
+                            },
+                            inputStyle={
+                                'marginRight': '8px',
+                                'transform': 'scale(1.2)'
+                            },
+                            style={'textAlign': 'center', 'display': 'flex', 'justifyContent': 'center', 'flexWrap': 'wrap'}
                         ),
-                        html.P(
-                            "The red dashed line marks the price increase on January 15, 2021. "
-                            "Use the region filters to see how different areas responded to the price change.",
-                            style={'color': '#666666', 'margin': '0', 'fontSize': '14px'}
-                        )
-                    ]
-                )
-            ]
-        ),
-        
-        # Graph Container
-        html.Div(
-            style={
-                'backgroundColor': 'white',
-                'padding': '25px',
-                'borderRadius': '12px',
-                'boxShadow': '0 2px 15px rgba(0, 0, 0, 0.1)'
-            },
-            children=[
-                dcc.Graph(
-                    id='sales_graph',
-                    figure=create_sales_chart(pink_morsel_df),
-                    config={'displayModeBar': True, 'displaylogo': False},
-                    style={'height': '600px'}
-                )
-            ]
-        ),
-        
-        # Footer
-        html.Div(
-            style={
-                'marginTop': '40px',
-                'padding': '20px',
-                'textAlign': 'center',
-                'color': '#999999',
-                'fontSize': '14px',
-                'borderTop': '1px solid #FFD1DC'
-            },
-            children=[
-                html.P("Soul Foods Analytics Dashboard • Created with Plotly Dash"),
-                html.P("Data Source: Pink Morsel Sales Records (2020-2022)")
-            ]
-        )
-    ]
-)
-
-# Callback to update the chart based on region
-@app.callback(
-    Output('sales_graph', 'figure'),
-    Input('region_selector', 'value')
-)
-def update_chart(selected_region):
-    return create_sales_chart(pink_morsel_df, selected_region)
+                        style={'marginBottom': '10px'}
+                    ),
+                    
+                    # Key Insight Box
+                    html.Div(
+                        style={
+                            'backgroundColor': '#FFF0F5',
+                            'borderLeft': '4px solid #FF6B9D',
+                            'padding': '15px',
+                            'marginTop': '20px',
+                            'borderRadius': '8px'
+                        },
+                        children=[
+                            html.H4(
+                                "📈 Key Insight:",
+                                style={'color': '#D6336C', 'marginBottom': '8px'}
+                            ),
+                            html.P(
+                                "The red dashed line marks the price increase on January 15, 2021. "
+                                "Use the region filters to see how different areas responded to the price change.",
+                                style={'color': '#666666', 'margin': '0', 'fontSize': '14px'}
+                            )
+                        ]
+                    )
+                ]
+            ),
+            
+            # Graph Container
+            html.Div(
+                style={
+                    'backgroundColor': 'white',
+                    'padding': '25px',
+                    'borderRadius': '12px',
+                    'boxShadow': '0 2px 15px rgba(0, 0, 0, 0.1)'
+                },
+                children=[
+                    dcc.Graph(
+                        id='sales_graph',
+                        figure=create_sales_chart(pink_morsel_df),
+                        config={'displayModeBar': True, 'displaylogo': False},
+                        style={'height': '600px'}
+                    )
+                ]
+            ),
+            
+            # Footer
+            html.Div(
+                style={
+                    'marginTop': '40px',
+                    'padding': '20px',
+                    'textAlign': 'center',
+                    'color': '#999999',
+                    'fontSize': '14px',
+                    'borderTop': '1px solid #FFD1DC'
+                },
+                children=[
+                    html.P("Soul Foods Analytics Dashboard • Created with Plotly Dash"),
+                    html.P("Data Source: Pink Morsel Sales Records (2020-2022)")
+                ]
+            )
+        ]
+    )
+    
+    # Callback to update the chart based on region
+    @app.callback(
+        Output('sales_graph', 'figure'),
+        Input('region_selector', 'value')
+    )
+    def update_chart(selected_region):
+        return create_sales_chart(pink_morsel_df, selected_region)
+    
+    return app
 
 # Run the app
 if __name__ == "__main__":
+    app = create_app()
     app.run(debug=True)
